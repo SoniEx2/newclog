@@ -1,0 +1,77 @@
+CAP prefix/clog
+===============
+
+Copyright (c) Soni L. \<fakedme plus irkv3 at gmail dot com>
+
+This capability provides a mechanism for identifying and conveying a cryptographically secured list of messages to IRC clients.
+
+This specification also suggests a mechanism by which IRC clients can sync logs, using the information provided by this capability.
+
+Cap syntax
+----------
+
+The capability shall be specified as
+
+    prefix/clog=hash_type,hash_type/tag,tag,tag
+
+Example:
+
+    prefix/clog=sha1,sha256/server-time
+
+`server-time` is always implicitly specified, and should be omitted.
+
+The `HASH` S2C command
+----------------------
+
+The `HASH` command shall be sent for hashes associated with a channel.
+
+Each hash must be a cryptographic hash. Non-cryptographic hashes must be ignored. Broken hash algorithms should be avoided. MD5 is explicitly disallowed and must not be used.
+
+The counter must be able to store numbers in the `0..2^62-1` range.
+
+Syntax:
+
+    HASH #channel :hash_type=counter/hash,type=counter/hash,...
+
+Example:
+
+    >>> JOIN #channel
+    <<< JOIN #channel
+    <<< NAMES etc
+    <<< HASH #channel :sha1=20,something_long
+    <<< HASH #channel :sha1=60,something_else sha256=70,another
+
+Optionally, the server may include a server name with the HASH command:
+
+    <<< :server1.example.com HASH #channel :etc
+    <<< :server2.example.com HASH #channel :other
+
+The `hash` message tag
+----------------------
+
+The `hash` mesaage tag shall be sent with every `PRIVMSG`, `TOPIC` and `NOTICE`.
+
+Syntax:
+
+    hash=type=counter/short_hash,type=counter/short_hash,...
+
+The use of `short_hash` lowers bandwidth requirements. Consult your cryptography expert for best practices on using cryptography.
+
+Example:
+
+    TODO
+
+The `SYNC` CTCP (informative)
+-----------------------------
+
+*This section is informative.*
+
+The `SYNC` CTCP is a hypothetical CTCP for syncing logs.
+
+Syntax:
+
+    SYNC <tox-compatible public key> <port> <host> <host> <...> -[nospam+checksum]
+
+This is a highly flexible command supporting ipv4, ipv6, hostname, tor, i2p and tox ID.
+
+Messages sent over non-tox channels must be encrypted with the tox-compatible public key.
